@@ -21,11 +21,7 @@ trait InertiaTable
      */
     public function scopeOrder($query, $column, $order = 'asc')
     {
-        if ($order !== 'asc') {
-            $order = 'desc';
-        }
-
-        $query->orderBy($column, $order);
+        $query->orderBy($column, $order !== 'asc' ? 'desc' : 'asc');
     }
 
     /**
