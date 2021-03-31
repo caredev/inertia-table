@@ -24,7 +24,7 @@ class InertiaTableServiceProvider extends ServiceProvider
             $routeName = strtolower($routeName);
             $routeKey = $routeKey ? $routeKey : Str::singular($routeName);
             $routePlaceholder = sprintf('{%s}', $routeKey);
-            $controller = $controller ? $controller : 'App\Http\Controllers\' . ucfirst($routeName).'Controller';
+            $controller = $controller ? $controller : 'App\Http\Controllers\\' . ucfirst($routeName) . 'Controller';
 
             Route::group([
                 'prefix' => '/'.$routeName,
