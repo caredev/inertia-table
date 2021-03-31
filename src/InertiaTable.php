@@ -16,24 +16,24 @@ class InertiaTable
      * @param Model $model The model to use to retrieve data
      * @param array $columns An array of column names to send to front end (null for all columns)'
      * @param array $filterable A subset of the $columns array containing names of columsn that can be filtered
+     * @param string $page The name of the inertia page to render, example "PageName" or "Folder/PageName"
      * @return void
      */
-    public function index(Model $model, array $columns = null, array $filterable = null)
+    public function render(Model $model, array $columns = null, array $filterable = null, string $page = null)
     {
         $modelName = class_basename($model);
-
-        if ($columns == null) { // default to all columns
+        $modelPlural = Str::plural($modelName);
+        
+        // Show all columns if no columns are specified
+        if ($columns === null) { 
             $table = $model->getTable();
             $columns = Schema::getColumnListing($table);
         }
-
-        if ($filterable == null) {
-            $filterable = $columns;
-        }
-
-        $modelPlural = Str::plural($modelName);
-
-        return Inertia::render($modelPlural.'/Index', [
+        
+        // Select which columns are filtrable. All are, if no column is specified.
+        $filterable ??= $columns;
+       
+        return Inertia::render($page === null ? $modelPlural.'/Index' : (strpos($page, '/') === false ? "$modelPlural/$page" : $page), [
             'filters' => Request::all('search', 'trashed'),
             'order' => Request::all('orderColumn', 'orderDirection'),
             strtolower($modelPlural) => $model
