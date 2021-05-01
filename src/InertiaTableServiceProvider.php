@@ -2,12 +2,11 @@
 
 namespace harmonic\InertiaTable;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
-class InertiaTableServiceProvider extends ServiceProvider
-{
+class InertiaTableServiceProvider extends ServiceProvider {
     protected $commands = [
         'harmonic\InertiaTable\Commands\MakeInertiaTable',
     ];
@@ -17,25 +16,68 @@ class InertiaTableServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         // Easily create all the inertia routes
-        Route::macro('inertiaTable', function ($routeName, $controller = null, $routeKey = null) {
-            $routeName = strtolower($routeName);
-            $routeKey = $routeKey ? $routeKey : Str::singular($routeName);
-            $routePlaceholder = sprintf('{%s}', $routeKey);
-            $controller = $controller ? $controller : 'App\Http\Controllers\\' . ucfirst($routeName) . 'Controller';
+        Route::macro('inertiaTable', function (
+            $name,
+            string $controller = null,
+            $singular = null,
+            $index = 'index',
+            $create = 'create',
+            $edit = 'edit',
+            $store = 'store',
+            $update = 'update',
+            $destroy = 'destroy',
+            $restore = 'restore',
+            $prefix = null,
+        ) {
+            $name = $prefix ? $prefix . '.' . strtolower($name) : strtolower($name);
+            $singular ??=  (string)Str::singular($name);
+            $controller ??= 'App\Http\Controllers\\' . ucfirst($name) . 'Controller';
 
             Route::group([
-                'prefix' => '/'.$routeName,
-            ], function () use ($controller, $routeName, $routePlaceholder) {
-                Route::get('/')->name($routeName)->uses($controller.'@index')->middleware('remember');
-                Route::get('/create')->name($routeName.'.create')->uses($controller.'@create');
-                Route::post('/')->name($routeName.'.store')->uses($controller.'@store');
-                Route::get(sprintf('/%s/edit', $routePlaceholder))->name($routeName.'.edit')->uses($controller.'@edit');
-                Route::put(sprintf('/%s', $routePlaceholder))->name($routeName.'.update')->uses($controller.'@update');
-                Route::delete(sprintf('/%s', $routePlaceholder))->name($routeName.'.destroy')->uses($controller.'@destroy');
-                Route::put(sprintf('/%s/restore', $routePlaceholder))->name($routeName.'.restore')->uses($controller.'@restore');
+                'prefix' => '/' . $name,
+            ], function () use (
+                $controller,
+                $name,
+                $singular,
+                $index,
+                $store,
+                $create,
+                $edit,
+                $update,
+                $destroy,
+                $restore,
+
+            ) {
+                Route::get("/")
+                    ->name("$name")
+                    ->uses($controller . "@$index")
+                    ->middleware('remember');
+
+                Route::get('/create')
+                    ->name("$name.$create")
+                    ->uses($controller . "@$create");
+
+                Route::post('/')
+                    ->name("$name.$store")
+                    ->uses($controller . "@$store");
+
+                Route::get("/$singular/$edit")
+                    ->name("$name.$edit")
+                    ->uses($controller . "@$edit");
+
+                Route::put("/$singular")
+                    ->name("$name.$update")
+                    ->uses($controller . "@$update");
+
+                Route::delete("/$singular")
+                    ->name("$name.$destroy")
+                    ->uses($controller . "@$destroy");
+
+                Route::put("/$singular/$restore")
+                    ->name("$name.$restore")
+                    ->uses($controller . "@$restore");
             });
         });
 
@@ -50,9 +92,8 @@ class InertiaTableServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
-        $this->mergeConfigFrom(__DIR__.'/../config/inertiatable.php', 'inertiatable');
+    public function register() {
+        $this->mergeConfigFrom(__DIR__ . '/../config/inertiatable.php', 'inertiatable');
 
         $this->commands($this->commands);
 
@@ -67,8 +108,7 @@ class InertiaTableServiceProvider extends ServiceProvider
      *
      * @return array
      */
-    public function provides()
-    {
+    public function provides() {
         return ['inertiatable'];
     }
 
@@ -77,11 +117,10 @@ class InertiaTableServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function bootForConsole()
-    {
+    protected function bootForConsole() {
         // Publishing the configuration file.
         $this->publishes([
-            __DIR__.'/../config/inertiatable.php' => config_path('inertiatable.php'),
+            __DIR__ . '/../config/inertiatable.php' => config_path('inertiatable.php'),
         ], 'inertiatable.config');
     }
 }
