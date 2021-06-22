@@ -13,7 +13,7 @@
     "keywords": ["Laravel", "inertiajs", "inertia", "InertiaTable"],
     "require": {
         "illuminate/support": "^8",
-        "inertiajs/inertia-laravel": "^0.3.6",
+        "inertiajs/inertia-laravel": "^0.4.2",
         "reinink/remember-query-strings": "^0.1.0",
         "symfony/process": "^5.2.3"
     },
